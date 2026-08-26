@@ -150,10 +150,10 @@ Download and install the latest Visual Studio 2026 Community edition:
 
 - https://visualstudio.microsoft.com/downloads
 
-During installation, select only these workloads:
+The installer allows you to install several different workloads, but we only need the two below for MAUI.:
 
-- MAUI development
-- Windows C++ development
+- .NET Multi-platform App UI development
+- Desktop development with C++
 
 Also make sure the Windows target platform and runtime support are installed, including the Windows target framework bits for MAUI. Without the Windows C++ tools and SDK support, the Windows MAUI app cannot build successfully.
 
@@ -193,41 +193,47 @@ On Windows, macOS, and Linux, create the latest supported Android emulator for M
 The exact flags may vary by preview build, so always check the CLI help first if your version differs:
 
 ```bash
-maui emulators --help
+maui android emulator --help
 ```
 
 Typical flow:
 
 ```bash
-maui emulators list
-maui emulators create android --name "Pixel_11_API_35"
+maui android emulator list
+maui android emulator create 
+# Follow the prompts to create the emulator
 ```
 
 If your preview CLI uses a different syntax, use the command help to find the current parameters. The key objective is to create a supported Android emulator image that works with the MAUI preview workload.
 
-After creation, start and validate it:
+After creation, start it:
 
 ```bash
-maui emulators start android --name "Pixel_11_API_35"
-maui emulators list
+maui android emulator start
+# select the emulator to start from the list
 ```
 
-You can also use Android Studio's Device Manager if the MAUI CLI does not expose the exact latest image in your version.
+Validate the emulator is running
+```bash
+# You should see the emulator running and you can interact with it once it fully boots.
+
+# You can also use this command to see that status of all Android devices and emulators
+maui device list
+```
 
 ## 8. Create a macOS simulator using the MAUI CLI
 
 On macOS only, create the newest simulator supported by MAUI preview:
 
 ```bash
-maui sim --help
+maui apple simulator --help
 ```
 
 Then create and launch a simulator using the MAUI CLI or the Apple tools. A typical pattern is:
 
 ```bash
-maui sim create ios
-maui sim list
-maui sim launch "iPhone 16 Pro"
+maui apple simulator list
+maui apple simulator start "iPhone 16 Pro"
 ```
 
 Because the exact command names can vary between MAUI preview versions, use `--help` to confirm syntax before running the commands.
@@ -358,7 +364,7 @@ If the app targets multiple frameworks, you can build a specific target by speci
 
 ```bash
 dotnet build -f net11.0-android
-dotnet build -f net11.0-windows10.0.19041.0
+dotnet build -f net11.0-windows10.0.26100.8249
 dotnet build -f net11.0-ios
 dotnet build -f net11.0-maccatalyst
 ```
@@ -371,7 +377,10 @@ Use `dotnet workload list` and `maui doctor` as needed if the build reports miss
 
 ```bash
 dotnet build -f net11.0-android
-dotnet build -f net11.0-android -t:Install -p:AndroidSdkDirectory=$ANDROID_SDK_ROOT
+# or
+dotnet build -f net11.0-android -t:Install 
+
+# dotnet build -f net11.0-android -t:Install -p:AndroidSdkDirectory=$ANDROID_SDK_ROOT
 ```
 
 Then run from Visual Studio or use the MAUI command-line flow depending on the CLI preview version. In most cases, launching the app from VS Code or Visual Studio is the easiest method once the emulator is available.
@@ -406,7 +415,7 @@ For iOS (macOS only):
 On Windows, build and launch the Windows target:
 
 ```bash
-dotnet build -f net11.0-windows10.0.19041.0
+dotnet build -f net11.0-windows10.0.26100.8249
 ```
 
 On macOS, you can run the Mac Catalyst target or test the iOS simulator if you are on a supported Apple development machine.

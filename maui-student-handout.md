@@ -146,15 +146,15 @@ Important: Linux can be used for MAUI Android development, but not as a full MAU
 Use the MAUI CLI to create the newest supported Android emulator for your machine:
 
 ```bash
-maui emulators --help
-maui emulators list
-maui emulators create android --name "Pixel_11_API_35"
+maui android emulator --help
+maui android emulator list
+maui android emulator create
 ```
 
 Start it:
 
 ```bash
-maui emulators start android --name "Pixel_11_API_35"
+maui android emulator start
 ```
 
 If the exact command names differ in your preview version, use `--help` to confirm the current syntax.
@@ -164,10 +164,9 @@ If the exact command names differ in your preview version, use `--help` to confi
 This is for macOS only.
 
 ```bash
-maui sim --help
-maui sim create ios
-maui sim list
-maui sim launch "iPhone 16 Pro"
+maui apple simulator --help
+maui apple simulator list
+maui apple simulator start "iPhone 16 Pro"
 ```
 
 Use `--help` if the command format differs in your preview build.
@@ -247,7 +246,7 @@ Build a specific target if needed:
 
 ```bash
 dotnet build -f net11.0-android
-dotnet build -f net11.0-windows10.0.19041.0
+dotnet build -f net11.0-windows10.0.26100.8249
 dotnet build -f net11.0-ios
 dotnet build -f net11.0-maccatalyst
 ```
