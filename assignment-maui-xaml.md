@@ -109,10 +109,7 @@ You should see something like this:
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="MauiXamlLab.MainPage">
+<ContentPage x:Class="MauiXamlLab.MainPage">
     <ScrollView>
         <VerticalStackLayout
             Padding="30,0"
@@ -144,12 +141,6 @@ This is the most important beginner concept:
 - standard controls use the default/global MAUI namespace
 - `x:` is for XAML-specific features
 
-The app is easiest to understand when the MAUI controls are written without a custom prefix. The app should not look like `maui:Label` or `maui:Button` in the beginner version.
-
-### Note for .NET 11
-In modern .NET 11 MAUI, the compiler may inject the default XAML namespaces implicitly. That means in some code examples you may not see the `xmlns` declarations explicitly. But for learning, keep them visible at first so students can see what is happening.
-
-After the namespace section, use the global/default namespace pattern in examples.
 
 ### Student task
 Add a short comment above the `ContentPage` root explaining that the default namespace gives access to MAUI controls without a prefix.
@@ -246,10 +237,7 @@ Replace the page with a page using `Grid` and `Border`.
 ### Code to add
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="MauiXamlLab.MainPage">
+<ContentPage x:Class="MauiXamlLab.MainPage">
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
@@ -341,14 +329,6 @@ Students are seeing the most common XAML controls:
 - `Slider`
 - `CheckBox`
 - `Switch`
-
-### Important beginner note
-The standard controls all use the default MAUI namespace, so the markup uses the global namespace pattern.
-
-Example:
-- `Label` instead of `maui:Label`
-- `Button` instead of `maui:Button`
-- `Grid` instead of `maui:Grid`
 
 ### Verification
 The page should show a set of common input controls without errors.
@@ -469,8 +449,6 @@ public static class AppSettings
 ### Update the XAML file
 ```xml
 <ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MauiXamlLab"
     x:Class="MauiXamlLab.MainPage">
 
@@ -561,8 +539,6 @@ Update `MainPage.xaml` to include a `CollectionView` with a `DataTemplate` that 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MauiXamlLab"
     x:Class="MauiXamlLab.MainPage">
 
@@ -648,16 +624,6 @@ Students should end with these files:
 - `MainPage.xaml.cs`
 - `AppSettings.cs`
 - `StudyItem.cs`
-
-### Final assignment requirement
-Students must add comments directly in the XAML and C# files to explain:
-
-- why the default namespace matters
-- why `x:Class` is required
-- why `x:Name` exists
-- why `StaticResource` and `DynamicResource` are used
-- how `OnPlatform` changes platform-specific values
-- how the code-behind class updates the UI
 
 ### Final app behavior checklist
 The final page should:
@@ -755,13 +721,4 @@ At the end of the assignment, students should answer three questions in writing:
 2. Why do we need both `x:Class` and `InitializeComponent()`?
 3. Why is `x:Name` useful in beginner XAML code?
 
-Students should give short answers in their own words. This helps confirm they understand the concepts, not just that the app runs.
 
----
-
-## Final teacher note
-This assignment deliberately keeps the app to a single page so students learn the fundamentals of XAML without distraction. It is not a full MVVM architecture project. The goal is clarity.
-
-By the time students finish this assignment, they should be comfortable reading XAML, recognizing namespaces, understanding `x:` directives, using `x:Name` in code-behind, and identifying the most important beginner MAUI controls and patterns.
-
-This assignment is designed to be a foundation project for the next lesson: data binding, styles, and MVVM.
