@@ -81,14 +81,12 @@ Students should already have:
 
 ## Project setup
 
-Start by creating a new MAUI project and enabling the preview features required for the newest .NET 11/XAML experience.
+Using the existing MauiXamlLab from assignment-maui-xaml, start from the root of the maui project.  Enable the preview features required for the newest .NET 11/XAML experience.
 
-```bash
-dotnet new maui -n MauiDevFlowLab
-cd MauiDevFlowLab
-```
 
-Open the project file and update the `PropertyGroup` section like this:
+Open the project file and update the `PropertyGroup` section to include the following additional elements:
+- EnablePreviewFeatures
+- MauiXamlInflator
 
 ```xml
 <PropertyGroup>
@@ -144,10 +142,13 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>();
 
-        builder.AddMauiDevFlowAgent(options =>
+        if (app.Environment.IsDevelopment())
         {
-            options.EnableLayoutDiagnostics = true;
-        });
+            builder.AddMauiDevFlowAgent(options =>
+            {
+                options.EnableLayoutDiagnostics = true;
+            });
+        }
 
         return builder.Build();
     }
