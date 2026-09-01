@@ -1,4 +1,4 @@
-# Assignment: Build a .NET 11 MAUI App with DevFlow
+# Assignment: Using DevFlow with MAUI App
 
 ## Overview
 
