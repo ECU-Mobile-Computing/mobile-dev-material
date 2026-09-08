@@ -97,8 +97,8 @@ Open the project file and update the `PropertyGroup` section to include the foll
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    <MauiXamlInflator>SourceGen</MauiXamlInflator>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures> <!-- Add this element if it is missing -->
+    <MauiXamlInflator>SourceGen</MauiXamlInflator> <!-- Add this element if it is missing -->
 </PropertyGroup>
 ```
 
@@ -142,13 +142,33 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>();
 
-        if (app.Environment.IsDevelopment())
-        {
+#if DEBUG
             builder.AddMauiDevFlowAgent(options =>
             {
-                options.EnableLayoutDiagnostics = true;
+                // below is list of possible options and their default values
+                options.Port = 9223;  
+                options.Enabled = true; 
+                options.MaxTreeDepth = 0; 
+                options.EnableFileLogging  = true; 
+                options.CaptureILogger = true; 
+                options.MaxLogFileSize = 1_048_576; 
+                options.MaxLogFiles = 5; 
+                options.CaptureConsole = true; 
+                options.CaptureTrace = true; 
+                options.EnableNetworkMonitoring = true; 
+                options.MaxNetworkBodySize = 256 * 1024; 
+                options.EnableProfiler = true;
+                options.ProfilerSampleIntervalMs  = 500;
+                options.MaxProfilerSamples = 20_000;
+                options.MaxProfilerMarkers = 20_000;
+                options.MaxProfilerSpans = 20_000;
+                options.EnableHighLevelUiHooks = true;
+                options.EnableDetailedUiHooks = false;
+                options.RequireMutationLease =true;
+                options.MutationLeaseTimeoutMs = 10_000;
+
             });
-        }
+#endif
 
         return builder.Build();
     }
@@ -174,66 +194,134 @@ Create a simple page that has a button and a status label. Give the button a fix
 ### `MainPage.xaml`
 
 ```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="MauiDevFlowLab.MainPage">
+<ContentPage x:Class="MauiXamlLab.MainPage">
 
-    <VerticalStackLayout Padding="24" Spacing="20">
-        <Label
-            Text="DevFlow Lab"
-            FontSize="32"
-            FontAttributes="Bold"
-            HorizontalOptions="Center" />
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_bot.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a submarine number ten" />
 
-        <Border
-            Stroke="#512BD4"
-            StrokeThickness="2"
-            Padding="18"
-            StrokeShape="RoundRectangle 12">
-            <VerticalStackLayout Spacing="12">
-                <Label
-                    x:Name="CounterLabel"
-                    Text="Count: 0"
-                    FontSize="24" />
+            <Label
+                Text="Hello, World!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
 
-                <Button
-                    x:Name="CounterBtn"
-                    AutomationId="CounterBtn"
-                    Text="Increment"
-                    Clicked="OnCounterClicked" />
+            <Label
+                Text="Welcome to &#10;.NET Multi-platform App UI"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
 
-                <Label
-                    x:Name="StatusLabel"
-                    Text="Ready. Use DevFlow to inspect this page."
-                    TextColor="DarkSlateGray" />
-            </VerticalStackLayout>
-        </Border>
-    </VerticalStackLayout>
+            <Button
+                x:Name="CounterBtn"
+                AutomationId="CounterBtn"
+                Text="Click me" 
+                SemanticProperties.Hint="Counts the number of times you click"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Fill" />
+
+            <Border Padding="24" 
+                    Stroke="#FF0000" 
+                    StrokeThickness="5" 
+                    StrokeShape="RoundRectangle 12">
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Layout demo changed" 
+                           FontSize="18" 
+                           FontAttributes="Bold" />
+                    
+                    <Label Text="This is inside a Border." />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Grid is a two-dimensional layout container. -->
+            <Grid ColumnDefinitions="*,Auto" 
+                  RowDefinitions="Auto,Auto" 
+                  ColumnSpacing="12" 
+                  RowSpacing="8">
+                
+                <Label Grid.Row="0" 
+                       Grid.Column="0" 
+                       Text="Name" 
+                       FontAttributes="Bold" />
+                <Entry Grid.Row="0" 
+                       Grid.Column="1" 
+                       Placeholder="Type your name" 
+                       WidthRequest="180" />
+
+                <Label Grid.Row="1" 
+                       Grid.Column="0" 
+                       Text="Notes" 
+                       FontAttributes="Bold" />
+                <Editor Grid.Row="1" 
+                        Grid.Column="1" 
+                        HeightRequest="100" 
+                        WidthRequest="180" />
+            </Grid>
+
+            <Label Text="Choose a theme" FontAttributes="Bold" />
+            <Picker Title="Pick a theme">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Light</x:String>
+                        <x:String>Dark</x:String>
+                        <x:String>System</x:String>
+                        <x:String>Pirate</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+
+            <Label Text="Choose a date" FontAttributes="Bold" />
+            <DatePicker />
+
+            <Label Text="Choose a time" FontAttributes="Bold" />
+            <TimePicker />
+
+            <Label Text="Volume" FontAttributes="Bold" />
+            <Slider Minimum="0" Maximum="100" Value="50" />
+
+            <HorizontalStackLayout Spacing="12">
+                <CheckBox />
+                <Label Text="Send updates" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Switch IsToggled="True" />
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>
 ```
 
 ### `MainPage.xaml.cs`
 
 ```csharp
-namespace MauiDevFlowLab;
+namespace MauiXamlLab;
 
 public partial class MainPage : ContentPage
 {
-    private int _count;
+	int count = 0;
 
-    public MainPage()
-    {
-        InitializeComponent();
-    }
+	public MainPage()
+	{
+		InitializeComponent();
+	}
 
-    private void OnCounterClicked(object sender, EventArgs e)
-    {
-        _count++;
-        CounterLabel.Text = $"Count: {_count}";
-        StatusLabel.Text = $"Button tapped {_count} time(s).";
-    }
+	private void OnCounterClicked(object? sender, EventArgs e)
+	{
+		count++;
+
+		if (count == 1)
+			CounterBtn.Text = $"Clicked {count} time";
+		else
+			CounterBtn.Text = $"Clicked {count} times";
+
+		SemanticScreenReader.Announce(CounterBtn.Text);
+	}
 }
 ```
 
@@ -473,7 +561,7 @@ The inspector gives students a visual map between the app and the underlying MAU
 
 ## Assignment instructions
 
-### Step 1: Create the project
+### Step 1: Use the existing MauiXamlLab project
 
 Create a new .NET 11 MAUI project and enable the required configuration.
 
@@ -547,7 +635,7 @@ Use the inspector to verify that the chosen element and property values match th
 
 ## Suggested reflection questions
 
-Students should answer these questions in their notebook or submission:
+Students should reflect on these questions:
 
 1. What is the difference between the CLI and the browser inspector?
 2. Why is `AutomationId` useful when debugging a MAUI app with DevFlow?
@@ -557,14 +645,10 @@ Students should answer these questions in their notebook or submission:
 
 ## Student deliverables
 
-Each student should submit:
+Each student must submit:
 
-- the final MAUI project
-- a working app that runs with DevFlow enabled
-- at least one screenshot captured using DevFlow
-- notes showing the commands used during inspection
-- a short written explanation of how DevFlow helped find or fix a UI issue
-- a final checklist confirming the project meets the requirements
+- submit a screenshot to Canvas showing results of DevFlow commands executed
+- submit a screenshot to Canvas showing the DevFlow Inspector running in the browser
 
 ## Final checklist
 
@@ -584,16 +668,6 @@ Students should verify all of the following before submission:
 - [ ] the browser inspector was opened at `http://localhost:19223/inspector/`
 - [ ] a property was changed or inspected live at runtime
 
-## Instructor notes
-
-This assignment is intentionally focused on learning by inspection and experimentation. DevFlow is most powerful when students can connect a real app to a live inspection and control workflow. The goal is to make UI debugging feel concrete and immediate rather than abstract.
-
-Teachers can extend the lab by:
-
-- adding more controls and nested layouts
-- creating a page with a clipped or misaligned layout and then using diagnostics to find the issue
-- asking students to use `query` and `set-property` to identify a missing or misconfigured control
-- having students compare a working and broken layout using DevFlow output
 
 ## Quick cheat sheet
 

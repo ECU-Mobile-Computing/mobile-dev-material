@@ -307,6 +307,12 @@ That is why binding works so well in MVVM.
 
 Here is a complete minimal example showing the pattern clearly.
 
+### Add CommunityToolkit.MVVM
+```bash
+dotnet add package CommunityToolkit.Mvvm
+
+```
+
 ### Model
 
 ```csharp
