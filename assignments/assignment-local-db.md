@@ -2,7 +2,7 @@
 
 ## Overview
 
-Build a single-page .NET 11 MAUI app that stores notes in an embedded SQLite database. The user can create, read, update, and delete notes. The data remains available after the app closes and restarts.
+Build a .NET 11 MAUI app that uses AppShell for route-based navigation and stores notes in an embedded SQLite database. The app has one content page in this assignment. The user can create, read, update, and delete notes, and the data remains available after the app closes and restarts.
 
 This is a guided assignment for students who are new to local databases. Complete the sections in order and verify each checkpoint before continuing.
 
@@ -19,6 +19,7 @@ By the end of this assignment, you should be able to:
 - implement asynchronous create, read, update, and delete operations
 - separate database, view model, and user-interface responsibilities
 - register services with dependency injection
+- define and use a route in AppShell
 - display database records with a `CollectionView`
 - verify that data persists after an app restart
 
@@ -29,6 +30,12 @@ An embedded database runs inside the application process. The app reads and writ
 This assignment uses SQLite because it is small, reliable, and supported on the platforms targeted by .NET MAUI.
 
 ```text
+App window
+	|
+	v
+AppShell route: //notes
+	|
+	v
 MainPage.xaml
       |
       | data binding and commands
@@ -62,6 +69,7 @@ The finished app will allow a user to:
 
 - .NET 11 SDK and compatible .NET MAUI 11 workload
 - .NET MAUI single-project app
+- AppShell for route-based navigation
 - `sqlite-net-pcl` for SQLite access
 - `CommunityToolkit.Mvvm` for observable properties and commands
 - dependency injection
@@ -467,17 +475,36 @@ The view model catches database errors and exposes a readable status message. Th
 
 ## 7. Create the page
 
+Before creating the page, make sure to create/configure the GlobalXamlNamespaces.cs file so we do not have to specify all XAML namespaces in all XAML pages.
+
+Create `src/LocalNotes.App/GlobalXamlNamespaces.cs` file and replace contents with the following:
+```csharp
+using Microsoft.Maui.Controls;
+
+[assembly: XmlnsDefinition(
+	"http://schemas.microsoft.com/dotnet/2021/maui",
+	"LocalNotes.App.Views")]
+
+[assembly: XmlnsDefinition(
+	"http://schemas.microsoft.com/dotnet/2021/maui",
+	"LocalNotes.App.ViewModels")]
+
+[assembly: XmlnsDefinition(
+	"http://schemas.microsoft.com/dotnet/2021/maui",
+	"LocalNotes.App.Models")]
+
+[assembly: XmlnsDefinition(
+	"http://schemas.microsoft.com/dotnet/2021/maui",
+	"LocalNotes.App.Data")]
+```
+
+
 Create a `Views` folder inside `src/LocalNotes.App`. Create `Views/MainPage.xaml`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
 	x:Class="LocalNotes.App.Views.MainPage"
-	x:DataType="vm:MainViewModel"
-	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:models="clr-namespace:LocalNotes.App.Models"
-	xmlns:vm="clr-namespace:LocalNotes.App.ViewModels"
 	Title="Local Notes">
 
 	<Grid
@@ -525,8 +552,7 @@ Create a `Views` folder inside `src/LocalNotes.App`. Create `Views/MainPage.xaml
 			<Label
 				VerticalOptions="Center"
 				Text="{Binding StatusMessage}"
-				LineBreakMode="WordWrap"
-				SemanticProperties.LiveSetting="Polite" />
+				LineBreakMode="WordWrap"/>
 			<ActivityIndicator
 				Grid.Column="1"
 				IsRunning="{Binding IsBusy}"
@@ -546,7 +572,7 @@ Create a `Views` folder inside `src/LocalNotes.App`. Create `Views/MainPage.xaml
 					VerticalOptions="Center" />
 			</CollectionView.EmptyView>
 			<CollectionView.ItemTemplate>
-				<DataTemplate x:DataType="models:Note">
+				<DataTemplate x:DataType="Note">
 					<Border
 						Margin="0,4"
 						Padding="12"
@@ -570,6 +596,7 @@ Create a `Views` folder inside `src/LocalNotes.App`. Create `Views/MainPage.xaml
 		</CollectionView>
 	</Grid>
 </ContentPage>
+
 ```
 
 ### Layout explanation
@@ -632,15 +659,16 @@ builder.AddMauiDevFlowAgent();
 builder.Services.AddSingleton<NoteDatabase>();
 builder.Services.AddSingleton<MainViewModel>();
 builder.Services.AddSingleton<MainPage>();
+builder.Services.AddSingleton<AppShell>();
 ```
 
 The `MAUI_DEVFLOW` blocks compile only in a DevFlow-enabled build. Do not replace them with `#if DEBUG`: an ordinary debug build does not necessarily contain the DevFlow agent package.
 
 ### Why singleton lifetime is used
 
-This app has one page and one local database connection. A singleton gives the app one `NoteDatabase`, one `MainViewModel`, and one `MainPage` for the lifetime of the process.
+This app has one content page, one Shell, and one local database connection. A singleton gives the app one `NoteDatabase`, one `MainViewModel`, one `MainPage`, and one `AppShell` for the lifetime of the process.
 
-The page asks for `MainViewModel`, and the view model asks for `NoteDatabase`. The dependency-injection container creates and connects these objects.
+App asks for `AppShell`, the page asks for `MainViewModel`, and the view model asks for `NoteDatabase`. The dependency-injection container creates and connects these objects.
 
 ### Enable DevFlow for debugger launches
 
@@ -667,35 +695,79 @@ If you test Mac Catalyst, open `Platforms/MacCatalyst/Entitlements.plist`. Add t
 
 The entitlement allows the in-app DevFlow agent to accept local diagnostic connections on Mac Catalyst.
 
-## 9. Make the page the application window
+## 9. Configure AppShell navigation
 
-Open `App.xaml.cs` and replace its contents:
+Shell is the application's navigation container. Even though this assignment has one content page, defining that page in Shell establishes a route-based structure that can later grow to include detail, settings, or other pages.
+
+Replace `AppShell.xaml` with:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+	x:Class="LocalNotes.App.AppShell"
+	FlyoutBehavior="Disabled"
+	Title="Local Notes">
+
+	<ShellContent
+		Title="Local Notes"
+		Route="notes"
+		ContentTemplate="{DataTemplate MainPage}" />
+</Shell>
+```
+
+Keep `AppShell.xaml.cs` small:
 
 ```csharp
-using LocalNotes.App.Views;
-
 namespace LocalNotes.App;
 
-public partial class App : Application
+public partial class AppShell : Shell
 {
-	private readonly MainPage mainPage;
-
-	public App(MainPage mainPage)
+	public AppShell()
 	{
 		InitializeComponent();
-		this.mainPage = mainPage;
-	}
-
-	protected override Window CreateWindow(IActivationState? activationState)
-	{
-		return new Window(mainPage);
 	}
 }
 ```
 
-The app receives `MainPage` from dependency injection and uses it as the root of the window. This single-page app does not need Shell navigation.
+`ShellContent` declares `MainPage` as part of the Shell visual hierarchy. Its route is `notes`. The absolute route is `//notes`, where `//` means start from the Shell root.
 
-You may delete the unused generated `MainPage.xaml`, `MainPage.xaml.cs`, `AppShell.xaml`, and `AppShell.xaml.cs` files from the project root after the new page is working. Do not keep two classes with the same fully qualified name.
+Do not also call `Routing.RegisterRoute("notes", typeof(MainPage))`. Routes declared in the Shell visual hierarchy are already registered. `Routing.RegisterRoute` is for pages that are navigated to at runtime but are not declared as visible Shell content.
+
+If another page is added later, it can return to the notes root with:
+
+```csharp
+await Shell.Current.GoToAsync("//notes");
+```
+
+Do not wrap `AppShell` in a `NavigationPage`, `TabbedPage`, or `FlyoutPage`. Shell already owns the navigation hierarchy.
+
+### Make AppShell the application window
+
+Open `App.xaml.cs` and replace its contents:
+
+```csharp
+namespace LocalNotes.App;
+
+public partial class App : Application
+{
+	private readonly AppShell appShell;
+
+	public App(AppShell appShell)
+	{
+		InitializeComponent();
+		this.appShell = appShell;
+	}
+
+	protected override Window CreateWindow(IActivationState? activationState)
+	{
+		return new Window(appShell);
+	}
+}
+```
+
+The app receives `AppShell` from dependency injection and uses it as the root of the window. Shell resolves the registered `MainPage` and its `MainViewModel` dependency when it creates the `notes` destination.
+
+Delete only the unused generated `MainPage.xaml` and `MainPage.xaml.cs` files from the project root after the new page in `Views` is working. Keep `AppShell.xaml` and `AppShell.xaml.cs`; they now own the application's navigation hierarchy.
 
 ## Checkpoint B: create and read a note
 
@@ -715,7 +787,8 @@ If the app fails before the page opens, inspect the debug output. Common causes 
 - the SQLite package was not restored
 - a file namespace does not match its folder or XAML `x:Class`
 - services were registered after `builder.Build()`
-- the old generated `MainPage` conflicts with the new page
+- `AppShell` or `MainPage` was not registered with dependency injection
+- the generated root `MainPage` conflicts with the new page in `Views`
 
 ## Checkpoint C: update and delete
 
@@ -857,6 +930,9 @@ Do not submit generated `bin` or `obj` folders.
 - [ ] Create, read, update, and delete all work.
 - [ ] Database work is outside the page code-behind.
 - [ ] The page uses dependency injection.
+- [ ] `AppShell` is the application window root and is registered with dependency injection.
+- [ ] `MainPage` is declared as the `notes` Shell route.
+- [ ] Shell is not wrapped in `NavigationPage`, `TabbedPage`, or `FlyoutPage`.
 - [ ] `MauiProgram.cs` conditionally imports and registers the DevFlow agent with `MAUI_DEVFLOW`.
 - [ ] The app is launched through the current .NET MAUI VS Code extension's DevFlow-enabled debugger.
 - [ ] No permanent or independently pinned `Microsoft.Maui.DevFlow.Agent` package is present.
