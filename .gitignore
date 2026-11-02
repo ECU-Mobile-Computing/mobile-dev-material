@@ -4,7 +4,10 @@
 ## Get latest from `dotnet new gitignore`
 
 scratch/
-
+!scratch/
+!scratch/MauiBackgroundSalesDemo/
+!scratch/MauiBackgroundSalesDemo/**
+prep/
 # dotenv files
 .env
 
